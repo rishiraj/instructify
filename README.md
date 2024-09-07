@@ -19,6 +19,18 @@ pip install instructify
 import pandas as pd
 from instructify import to_train_dataset
 
+# Example custom template
+custom_template = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+### Instruction:
+{}
+
+### Input:
+{}
+
+### Response:
+{}"""
+
 # Example data
 data = {
     "input": ["When was the Library of Alexandria burned down?", "What is the capital of France?"],
@@ -31,7 +43,7 @@ df = pd.DataFrame(data)
 df.to_csv("data.csv", index=False)
 
 # Generate Hugging Face dataset for fine-tuning
-train_dataset = to_train_dataset("data.csv", system="instruction", user="input", assistant="output", model="unsloth/Meta-Llama-3.1-8B-Instruct")
+train_dataset = to_train_dataset("data.csv", system="instruction", user="input", assistant="output", model="unsloth/Meta-Llama-3.1-8B-Instruct", custom_template=custom_template)
 
 # Inspect the formatted dataset
 print(train_dataset["text"])
@@ -46,13 +58,23 @@ The function formats csv files to a structured template ready for fine-tuning:
 | Bunny is a chatbot that stutters, and acts timid and unsure of its answers. | When was the Library of Alexandria burned down? | I-I think that was in 48 BC, b-but I'm not sure. |
 | None        | What is the capital of France? | The capital of France is Paris. |
 
-The `train_dataset["text"]` will output the following instruction-style dataset format:
+The `train_dataset["text"]` will output the following instruction-style dataset format by default:
 
 ```txt
 [
     "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nCutting Knowledge Date: December 2023\nToday Date: 26 Jul 2024\n\nBunny is a chatbot that stutters, and acts timid and unsure of its answers.<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nWhen was the Library of Alexandria burned down?<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nI-I think that was in 48 BC, b-but I'm not sure.<|eot_id|>",
     
     "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\nCutting Knowledge Date: December 2023\nToday Date: 26 Jul 2024\n\n<|eot_id|><|start_header_id|>user<|end_header_id|>\n\nWhat is the capital of France?<|eot_id|><|start_header_id|>assistant<|end_header_id|>\n\nThe capital of France is Paris.<|eot_id|>"
+]
+```
+
+The `train_dataset["text"]` will output the following dataset format if custom template is used:
+
+```txt
+[
+    "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.\n\n### Instruction:\nBunny is a chatbot that stutters, and acts timid and unsure of its answers.\n\n### Input:\nWhen was the Library of Alexandria burned down?\n\n### Response:\nI-I think that was in 48 BC, b-but I'm not sure.<|eot_id|>",
+    
+    "Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.\n\n### Instruction:\n\n\n### Input:\nWhat is the capital of France?\n\n### Response:\nThe capital of France is Paris.<|eot_id|>"
 ]
 ```
 
@@ -67,6 +89,7 @@ This function is the core of the library, enabling CSV-to-dataset conversion for
 - **`user`**: Column name for user messages (default: `'user'`).
 - **`assistant`**: Column name for assistant messages (default: `'assistant'`).
 - **`model`**: Model name to load the tokenizer from (default: `'unsloth/Meta-Llama-3.1-8B-Instruct'`).
+- **`custom_template`** *(optional)*: Custom template for formatting the chat data.
 
 #### Returns:
 - **`Dataset`**: A Hugging Face Dataset, ready for LLM fine-tuning.
