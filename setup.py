@@ -45,7 +45,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
-    ]
+    ],
     python_requires=">=3.9",
     entry_points={"console_scripts": ["instructify = instructify.main:to_train_dataset"]},
     install_requires=requirements,
