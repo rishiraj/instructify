@@ -21,17 +21,17 @@ from instructify import to_train_dataset
 
 # Example data
 data = {
-    "user_prompt": ["When was the Library of Alexandria burned down?", "What is the capital of France?"],
-    "assistant_response": ["I-I think that was in 48 BC, b-but I'm not sure.", "The capital of France is Paris."],
-    "system_prompt": ["Bunny is a chatbot that stutters, and acts timid and unsure of its answers.", None]
+    "input": ["When was the Library of Alexandria burned down?", "What is the capital of France?"],
+    "output": ["I-I think that was in 48 BC, b-but I'm not sure.", "The capital of France is Paris."],
+    "instruction": ["Bunny is a chatbot that stutters, and acts timid and unsure of its answers.", None]
 }
 
 # Convert data to CSV
 df = pd.DataFrame(data)
-df.to_csv("input.csv", index=False)
+df.to_csv("data.csv", index=False)
 
 # Generate Hugging Face dataset for fine-tuning
-train_dataset = to_train_dataset("input.csv", system="system_prompt", user="user_prompt", assistant="assistant_response", model="unsloth/Meta-Llama-3.1-8B-Instruct")
+train_dataset = to_train_dataset("data.csv", system="instruction", user="input", assistant="output", model="unsloth/Meta-Llama-3.1-8B-Instruct")
 
 # Inspect the formatted dataset
 print(train_dataset["text"])
@@ -39,12 +39,12 @@ print(train_dataset["text"])
 
 ## Output Example 📄
 
-The function formats messages in a structured template ready for fine-tuning:
+The function formats csv files to a structured template ready for fine-tuning:
 
-| System Prompt | User Prompt | Assistant Response |
-|---------------|--------------|--------------------|
+| instruction | input | output |
+|-------------|-------|--------|
 | Bunny is a chatbot that stutters, and acts timid and unsure of its answers. | When was the Library of Alexandria burned down? | I-I think that was in 48 BC, b-but I'm not sure. |
-| None          | What is the capital of France?   | The capital of France is Paris. |
+| None        | What is the capital of France? | The capital of France is Paris. |
 
 The `train_dataset["text"]` will output the following instruction-style dataset format:
 
