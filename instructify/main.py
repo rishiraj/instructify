@@ -1,13 +1,13 @@
 import pandas as pd
 from transformers import AutoTokenizer
-from datasets import Dataset
+from datasets import Dataset, load_dataset
 
-def to_train_dataset(csv_path, system=None, user='user', assistant='assistant', model='unsloth/Meta-Llama-3.1-8B-Instruct', custom_template=None):
+def to_train_dataset(data_source, system=None, user='user', assistant='assistant', model='unsloth/Meta-Llama-3.1-8B-Instruct', custom_template=None):
     """
-    Converts a CSV to a Hugging Face Dataset, formatted for LLM fine-tuning.
+    Converts a CSV or Hugging Face dataset to a Hugging Face Dataset, formatted for LLM fine-tuning.
     
     Args:
-        csv_path (str): Path to the CSV file.
+        data_source (str): Path to the CSV file or Hugging Face dataset identifier.
         system (str): Column name for system messages (optional).
         user (str): Column name for user messages.
         assistant (str): Column name for assistant messages.
@@ -18,9 +18,14 @@ def to_train_dataset(csv_path, system=None, user='user', assistant='assistant', 
         Dataset: Hugging Face Dataset ready for fine-tuning.
     """
     
-    # Load the CSV into a DataFrame
-    df = pd.read_csv(csv_path)
-    
+    # Load the data based on whether it's a CSV or a Hugging Face dataset
+    if data_source.endswith('.csv'):
+        df = pd.read_csv(data_source)
+    else:
+        # Load dataset using Hugging Face datasets library
+        dataset = load_dataset(data_source, split='train')
+        df = dataset.to_pandas()
+
     # Initialize the tokenizer from the model
     tokenizer = AutoTokenizer.from_pretrained(model)
     EOS_TOKEN = tokenizer.eos_token  # End of Sequence token
@@ -70,6 +75,7 @@ if __name__ == "__main__":
 ### Response:
 {}"""
     
+    # Using CSV input
     data = {
         "input": ["When was the Library of Alexandria burned down?", "What is the capital of France?"],
         "output": ["I-I think that was in 48 BC, b-but I'm not sure.", "The capital of France is Paris."],
@@ -79,5 +85,9 @@ if __name__ == "__main__":
     df = pd.DataFrame(data)
     df.to_csv("data.csv", index=False)
     
-    train_dataset = to_train_dataset("data.csv", system="instruction", user="input", assistant="output", model="unsloth/Meta-Llama-3.1-8B-Instruct", custom_template=custom_template)
-    print(train_dataset["text"])
+    train_dataset_csv = to_train_dataset("data.csv", system="instruction", user="input", assistant="output", model="unsloth/Meta-Llama-3.1-8B-Instruct", custom_template=custom_template)
+    print(train_dataset_csv["text"])
+
+    # Using Hugging Face dataset input
+    train_dataset_hf = to_train_dataset("yahma/alpaca-cleaned", system="instruction", user="input", assistant="output", model="unsloth/Meta-Llama-3.1-8B-Instruct", custom_template=custom_template)
+    print(train_dataset_hf["text"])
