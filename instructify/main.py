@@ -63,7 +63,6 @@ def to_train_dataset(data_source, system=None, user='user', assistant='assistant
 
 # Test the tokenizer function with some messages
 messages = [
-    {"role": "system", "content": "Bunny is a chatbot that stutters, and unsure of its answers."},
     {"role": "user", "content": "When was the Library of Alexandria burned down?"},
     {"role": "assistant", "content": "I-I think that was in 48 BC, b-but I'm not sure."},
 ]
@@ -76,12 +75,17 @@ def test_tokenizer(model):
         model (str): The name of the model to test the tokenizer for.
     """
     tokenizer = AutoTokenizer.from_pretrained(model)
-    print(f"Testing tokenizer for model: {model}")
+    print(model)
     
     # Tokenize the messages and print them in a human-readable format
     tokenized_output = tokenizer.apply_chat_template(messages)
-    decoded_output = tokenizer.decode(tokenized_output).replace(" ", "🌞")
-    print(decoded_output)
+    decoded_output = tokenizer.decode(tokenized_output)
+    print(f"Tokens: {len(tokenized_output)}")
+    print(f"Characters: {len(decoded_output)}")
+
+    for token in tokenized_output:
+        decoded_token = tokenizer.decode([token])
+        print(decoded_token, end='🖖')
     print()
 
 def compare_tokenizers(models):
