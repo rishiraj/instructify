@@ -85,7 +85,9 @@ def test_tokenizer(model):
 
     for token in tokenized_output:
         decoded_token = tokenizer.decode([token])
-        print(decoded_token, end='🖖')
+        decoded_token = decoded_token.replace(" ", "🤜")
+        decoded_token = decoded_token.replace("\n", "💧")
+        print(decoded_token, end="💔")
     print()
 
 def compare_tokenizers(models):
