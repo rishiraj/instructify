@@ -1,11 +1,12 @@
 # Instructify 📝
 
-Instructify is a Python library designed to convert CSV files into Hugging Face Datasets, specifically formatted for fine-tuning large language models (LLMs). Inspired by the instruction-based dataset approach described in OpenAI's InstructGPT paper ([2203.02155](https://arxiv.org/abs/2203.02155)), this package helps prepare your data for instruction-based tasks using a chat-like format.
+Instructify is a Python library designed to convert CSV files or Hugging Face datasets into Hugging Face Dataset objects, specifically formatted for fine-tuning large language models (LLMs). Inspired by the instruction-based dataset approach described in OpenAI's InstructGPT paper ([2203.02155](https://arxiv.org/abs/2203.02155)), this package helps prepare your data for instruction-based tasks using a chat-like format.
 
 ## Features ✨
-- **CSV to Hugging Face Dataset**: Convert CSV files into Hugging Face Dataset objects ready for model fine-tuning.
+- **CSV or Hugging Face Dataset Support**: Automatically detect whether the input is a CSV file or a Hugging Face dataset.
 - **Customizable Message Formatting**: Supports user, assistant, and system messages with flexible column names.
 - **Tokenizer Integration**: Automatically integrates with a pre-trained tokenizer to format messages.
+- **Custom Templates**: Apply a custom template or use the tokenizer's default chat format.
 - **Easy Fine-Tuning Preparation**: Prepares data for instruction tuning, similar to the InstructGPT format.
 
 ## Installation 📦
@@ -14,6 +15,8 @@ pip install instructify
 ```
 
 ## Usage 🚀
+
+### CSV Input
 
 ```python
 import pandas as pd
@@ -49,16 +52,42 @@ train_dataset = to_train_dataset("data.csv", system="instruction", user="input",
 print(train_dataset["text"])
 ```
 
+### Hugging Face Dataset Input
+
+```python
+from instructify import to_train_dataset
+
+# Example custom template
+alpaca_prompt = """Below is an instruction that describes a task, paired with an input that provides further context. Write a response that appropriately completes the request.
+
+### Instruction:
+{}
+
+### Input:
+{}
+
+### Response:
+{}"""
+
+# Using a Hugging Face dataset
+train_dataset = to_train_dataset("yahma/alpaca-cleaned", system="instruction", user="input", assistant="output", model="unsloth/Meta-Llama-3.1-8B-Instruct", custom_template=alpaca_prompt)
+
+# Inspect the formatted dataset
+print(train_dataset["text"])
+```
+
 ## Output Example 📄
 
-The function formats csv files to a structured template ready for fine-tuning:
+The function formats CSV files or Hugging Face datasets into a structured template ready for fine-tuning:
 
 | instruction | input | output |
 |-------------|-------|--------|
 | Bunny is a chatbot that stutters, and acts timid and unsure of its answers. | When was the Library of Alexandria burned down? | I-I think that was in 48 BC, b-but I'm not sure. |
 | None        | What is the capital of France? | The capital of France is Paris. |
 
-The `train_dataset["text"]` will output the following instruction-style dataset format by default:
+### Default Output Format
+
+The `train_dataset["text"]` will output the following instruction-style dataset format when using the default tokenizer template:
 
 ```txt
 [
@@ -68,7 +97,9 @@ The `train_dataset["text"]` will output the following instruction-style dataset 
 ]
 ```
 
-The `train_dataset["text"]` will output the following dataset format if custom template is used:
+### Custom Template Output
+
+The `train_dataset["text"]` will output the following format when using a custom template:
 
 ```txt
 [
@@ -81,10 +112,10 @@ The `train_dataset["text"]` will output the following dataset format if custom t
 ## Functionality Overview 🔍
 
 ### `to_train_dataset`
-This function is the core of the library, enabling CSV-to-dataset conversion for LLM fine-tuning.
+This function is the core of the library, enabling both CSV and Hugging Face dataset conversion for LLM fine-tuning.
 
 #### Parameters:
-- **`csv_path`**: Path to the input CSV file.
+- **`data_source`**: Path to the input CSV file or Hugging Face dataset identifier.
 - **`system`** *(optional)*: Column name for system messages (e.g., instructions for the model).
 - **`user`**: Column name for user messages (default: `'user'`).
 - **`assistant`**: Column name for assistant messages (default: `'assistant'`).
