@@ -7,6 +7,7 @@ Instructify is a Python library designed to convert CSV files or Hugging Face da
 - **Customizable Message Formatting**: Supports user, assistant, and system messages with flexible column names.
 - **Tokenizer Integration**: Automatically integrates with a pre-trained tokenizer to format messages.
 - **Custom Templates**: Apply a custom template or use the tokenizer's default chat format.
+- **Tokenizer Visualization**: You can use the tool below to understand how a piece of text might be tokenized by a language model, and the total count of tokens in that piece of text.
 - **Easy Fine-Tuning Preparation**: Prepares data for instruction tuning, similar to the InstructGPT format.
 
 ## Installation 📦
@@ -76,7 +77,23 @@ train_dataset = to_train_dataset("yahma/alpaca-cleaned", system="instruction", u
 print(train_dataset["text"])
 ```
 
-## Output Example 📄
+### Tokenizer Visualization 👁️
+
+In addition to converting datasets, you can now visualize how different tokenizers process chat messages. The visualization displays the tokenized text with the following special symbols:
+- **🤜 (Right-Facing Fist)**: Represents spaces between words.
+- **💧 (Droplet)**: Represents newline characters.
+- **💔 (Broken Heart)**: Marks token boundaries.
+
+```python
+from instructify import compare_tokenizers
+
+# Compare tokenizers from different models
+compare_tokenizers(["unsloth/Meta-Llama-3.1-8B-Instruct", "unsloth/gemma-2-9b-it"])
+```
+
+This will help you understand how a piece of text might be tokenized by a language model, with the total count of tokens displayed.
+
+### Output Example 📄
 
 The function formats CSV files or Hugging Face datasets into a structured template ready for fine-tuning:
 
