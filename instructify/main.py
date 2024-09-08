@@ -61,6 +61,39 @@ def to_train_dataset(data_source, system=None, user='user', assistant='assistant
     
     return hf_dataset
 
+# Test the tokenizer function with some messages
+messages = [
+    {"role": "system", "content": "Bunny is a chatbot that stutters, and unsure of its answers."},
+    {"role": "user", "content": "When was the Library of Alexandria burned down?"},
+    {"role": "assistant", "content": "I-I think that was in 48 BC, b-but I'm not sure."},
+]
+
+def test_tokenizer(model):
+    """
+    Tests how a tokenizer from a given model processes a set of messages.
+    
+    Args:
+        model (str): The name of the model to test the tokenizer for.
+    """
+    tokenizer = AutoTokenizer.from_pretrained(model)
+    print(f"Testing tokenizer for model: {model}")
+    
+    # Tokenize the messages and print them in a human-readable format
+    tokenized_output = tokenizer.apply_chat_template(messages)
+    decoded_output = tokenizer.decode(tokenized_output).replace(" ", "🌞")
+    print(decoded_output)
+    print()
+
+def compare_tokenizers(models):
+    """
+    Compare tokenizers from different models to see how they process the same messages.
+    
+    Args:
+        models (list): List of model names to compare.
+    """
+    for model in models:
+        test_tokenizer(model)
+
 # Example usage
 if __name__ == "__main__":
     # Example call to the function with a custom template
@@ -79,15 +112,18 @@ if __name__ == "__main__":
     data = {
         "input": ["When was the Library of Alexandria burned down?", "What is the capital of France?"],
         "output": ["I-I think that was in 48 BC, b-but I'm not sure.", "The capital of France is Paris."],
-        "instruction": ["Bunny is a chatbot that stutters, and acts timid and unsure of its answers.", None]
+        "instruction": ["Bunny is a chatbot that stutters, and unsure of its answers.", None]
     }
     
     df = pd.DataFrame(data)
     df.to_csv("data.csv", index=False)
     
     train_dataset_csv = to_train_dataset("data.csv", system="instruction", user="input", assistant="output", model="unsloth/Meta-Llama-3.1-8B-Instruct", custom_template=custom_template)
-    print(train_dataset_csv["text"])
+    print(train_dataset_csv["text"][:2])
 
     # Using Hugging Face dataset input
     train_dataset_hf = to_train_dataset("yahma/alpaca-cleaned", system="instruction", user="input", assistant="output", model="unsloth/Meta-Llama-3.1-8B-Instruct", custom_template=custom_template)
-    print(train_dataset_hf["text"])
+    print(train_dataset_hf["text"][:2])
+
+    # Compare multiple tokenizers
+    compare_tokenizers(["unsloth/Meta-Llama-3.1-8B-Instruct", "unsloth/gemma-2-9b-it"])
